@@ -1,43 +1,14 @@
 from flask import Flask, request
 from flask_restful import Api, Resource
-from flask_sqlalchemy import SQLAlchemy
-from marshmallow import Schema, fields
+from db import db
+from models import StoreModel, ItemModel
+from schemas import ItemSchema, StoreSchema
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-db = SQLAlchemy(app)
 api = Api(app)
-
-class ItemModel(db.Model):
-    __tablename__ = "items"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True, nullable=False)
-    price = db.Column(db.Float(precision=2), nullable=False)
-    store_id = db.Column(db.Integer, db.ForeignKey("stores.id"), nullable=False)
-    store = db.relationship("StoreModel", back_populates="items")
-
-class StoreModel(db.Model):
-    __tablename__ = "stores"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True, nullable=False)
-    items = db.relationship("ItemModel", back_populates="store", lazy="dynamic")
-
-class PlainItemSchema(Schema):
-    id = fields.Int(dump_only=True)
-    name = fields.Str(required=True)
-    price = fields.Float(required=True)
-
-class PlainStoreSchema(Schema):
-    id = fields.Int(dump_only=True)
-    name = fields.Str()
-
-class ItemSchema(PlainItemSchema):
-    store_id = fields.Int(required=True, load_only=True)
-    store = fields.Nested(PlainStoreSchema(), dump_only=True)
-
-class StoreSchema(PlainStoreSchema):
-    items = fields.List(fields.Nested(PlainItemSchema()), dump_only=True)
+db.init_app(app)
 
 item_schema = ItemSchema()
 store_schema = StoreSchema()
