@@ -15,3 +15,9 @@ class ItemSchema(PlainItemSchema):
 
 class StoreSchema(PlainStoreSchema):
     items = fields.List(fields.Nested(PlainItemSchema()), dump_only=True)
+
+class TagSchema(Schema):
+    id = fields.Int(dump_only=True)
+    name = fields.Str(required=True)
+    store_id = fields.Int(load_only=True)
+    items = fields.List(fields.Int(), dump_only=True)
