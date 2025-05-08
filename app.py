@@ -13,6 +13,9 @@ api = Api(app)
 db.init_app(app)
 jwt = JWTManager(app)
 
+with app.app_context():
+    db.create_all()
+
 item_schema = ItemSchema()
 store_schema = StoreSchema()
 tag_schema = TagSchema()
@@ -135,6 +138,4 @@ api.add_resource(Tag, "/tag/<int:tag_id>")
 api.add_resource(LinkTagToItem, "/item/<int:item_id>/tag/<int:tag_id>")
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
